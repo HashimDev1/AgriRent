@@ -61,66 +61,6 @@ The routing and controller layers are modularized by actor roles to isolate busi
 
 ---
 
-## ⚙️ Installation & Setup
-
-### Prerequisites
-- Node.js installed locally.
-- MongoDB server active on `mongodb://127.0.0.1:27017`.
-
-### Environment Variables
-
-#### Backend (`server/.env`)
-```env
-PORT=5000
-MONGO_URI=mongodb://127.0.0.1:27017/agrirent
-JWT_SECRET=agrirent_secret_key
-CLIENT_URL=http://localhost:5173
-```
-
-#### Frontend (`client/.env`)
-```env
-VITE_API_URL=http://localhost:5000/api
-```
-
----
-
-## 🚀 Execution Steps
-
-### 1. Database Seeding
-First, initialize the database collections and populate demo data:
-```bash
-cd server
-npm run seed
-```
-
-#### Seeding Dashboard Test Accounts
-If you have registered custom users, you can seed specific active/pending listings and transactions to test both dashboards:
-```bash
-cd server
-node scripts/test-seed.js
-```
-This script populates listings and bookings for:
-* **Owner**: `hzsp23bcs@gmail.com` (password: `password123`)
-* **Farmer**: `mh7142809@gmail.com` (password: `password123`)
-
-### 2. Run Backend API Server
-```bash
-cd server
-npm install
-npm run dev
-```
-*(Runs on `http://localhost:5000`)*
-
-### 3. Run Frontend Client App
-```bash
-cd client
-npm install
-npm run dev
-```
-*(Runs on `http://localhost:5173`)*
-
----
-
 ## 📋 REST API Endpoints Summary
 
 ### Auth
@@ -159,8 +99,6 @@ npm run dev
 
 ---
 
-## 📷 Screenshots Placeholders
-*Screenshots can be added under `/client/public/screenshots/` to demonstrate home screen, dashboards, and booking modals.*
 
 ---
 
