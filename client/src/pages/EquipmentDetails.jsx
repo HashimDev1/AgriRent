@@ -14,6 +14,14 @@ const EquipmentDetails = () => {
   const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState('');
 
+  const fallbackImage = 'https://images.unsplash.com/photo-1599819811279-d5ad9cccf838?auto=format&fit=crop&w=700&q=80';
+  const getImageUrl = (image) => {
+    if (!image) return fallbackImage;
+    if (typeof image === 'string') return image;
+    if (typeof image === 'object' && image.url) return image.url;
+    return fallbackImage;
+  };
+
   useEffect(() => {
     const fetchDetails = async () => {
       try {
@@ -68,7 +76,7 @@ const EquipmentDetails = () => {
         <div className="lg:col-span-7 space-y-4">
           <div className="bg-gray-100 rounded-2xl overflow-hidden aspect-video max-h-[400px]">
             <img
-              src={activeImage || 'https://images.unsplash.com/photo-1599819811279-d5ad9cccf838?auto=format&fit=crop&w=700&q=80'}
+              src={getImageUrl(activeImage)}
               alt={equipment.title}
               className="w-full h-full object-cover"
             />
@@ -80,10 +88,10 @@ const EquipmentDetails = () => {
                   key={index}
                   onClick={() => setActiveImage(img)}
                   className={`w-20 h-14 rounded-lg overflow-hidden border-2 shrink-0 ${
-                    activeImage === img ? 'border-primary-600' : 'border-transparent'
+                    getImageUrl(activeImage) === getImageUrl(img) ? 'border-primary-600' : 'border-transparent'
                   }`}
                 >
-                  <img src={img} alt="" className="w-full h-full object-cover" />
+                  <img src={getImageUrl(img)} alt="" className="w-full h-full object-cover" />
                 </button>
               ))}
             </div>
@@ -151,7 +159,7 @@ const EquipmentDetails = () => {
               <div className="flex items-center space-x-3">
                 <img
                   className="h-10 w-10 rounded-full object-cover border border-primary-200"
-                  src={equipment.ownerId.profileImage || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80'}
+                  src={(equipment.ownerId.profileImage?.url || equipment.ownerId.profileImage) || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80'}
                   alt={equipment.ownerId.name}
                 />
                 <div>
@@ -207,7 +215,7 @@ const EquipmentDetails = () => {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <img
-                      src={rev.reviewerId?.profileImage || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80'}
+                      src={(rev.reviewerId?.profileImage?.url || rev.reviewerId?.profileImage) || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80'}
                       alt=""
                       className="w-6 h-6 rounded-full object-cover"
                     />

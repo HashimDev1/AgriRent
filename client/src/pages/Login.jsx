@@ -116,11 +116,18 @@ const Login = () => {
           </button>
         </form>
 
-        <div className="text-center pt-4 border-t border-gray-100 text-xs text-gray-500">
-          <span>New to AgriRent? </span>
-          <Link to="/register" className="font-bold text-primary-600 hover:underline">
-            Create an account
-          </Link>
+        <div className="text-center pt-4 border-t border-gray-100 text-xs text-gray-500 space-y-2 flex flex-col">
+          <div>
+            <span>New to AgriRent? </span>
+            <Link to="/register" className="font-bold text-primary-600 hover:underline">
+              Create an account
+            </Link>
+          </div>
+          <div>
+            <Link to="/forgot-password" className="text-gray-400 hover:text-primary-600 font-semibold hover:underline">
+              Forgot password?
+            </Link>
+          </div>
         </div>
 
       </div>

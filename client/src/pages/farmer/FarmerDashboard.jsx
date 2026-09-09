@@ -4,6 +4,7 @@ import { AuthContext } from '../../context/AuthContext';
 import API from '../../api/axios';
 import Sidebar from '../../components/Sidebar';
 import DashboardCard from '../../components/DashboardCard';
+import MobileBackButton from '../../components/MobileBackButton';
 import EquipmentCard from '../../components/EquipmentCard';
 import LoadingSpinner from '../../components/LoadingSpinner';
 
@@ -64,6 +65,7 @@ const FarmerDashboard = () => {
       <Sidebar role="farmer" />
 
       <main className="flex-1 p-6 md:p-8 space-y-8 max-w-7xl mx-auto overflow-hidden">
+        <MobileBackButton />
         {/* Welcome Section */}
         <div className="bg-gradient-to-r from-[#135c2f] to-[#15803d] p-6 md:p-8 rounded-2xl text-white shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="space-y-2 text-center md:text-left">

@@ -5,7 +5,13 @@ import StatusBadge from './StatusBadge';
 
 const EquipmentCard = ({ equipment, isOwnerView = false, onEdit, onDelete }) => {
   const fallbackImage = 'https://images.unsplash.com/photo-1599819811279-d5ad9cccf838?auto=format&fit=crop&w=600&q=80';
-  const imgUrl = equipment.images && equipment.images.length > 0 ? equipment.images[0] : fallbackImage;
+  const getImageUrl = (image) => {
+    if (!image) return fallbackImage;
+    if (typeof image === 'string') return image;
+    if (typeof image === 'object' && image.url) return image.url;
+    return fallbackImage;
+  };
+  const imgUrl = equipment.images && equipment.images.length > 0 ? getImageUrl(equipment.images[0]) : fallbackImage;
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover-card flex flex-col h-full">

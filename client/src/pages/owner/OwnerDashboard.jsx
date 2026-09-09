@@ -4,6 +4,7 @@ import API from '../../api/axios';
 import { AuthContext } from '../../context/AuthContext';
 import Sidebar from '../../components/Sidebar';
 import DashboardCard from '../../components/DashboardCard';
+import MobileBackButton from '../../components/MobileBackButton';
 import StatusBadge from '../../components/StatusBadge';
 import LoadingSpinner from '../../components/LoadingSpinner';
 
@@ -84,6 +85,7 @@ const OwnerDashboard = () => {
       <Sidebar role="owner" />
 
       <main className="flex-1 p-6 md:p-8 space-y-8 max-w-7xl mx-auto overflow-hidden">
+        <MobileBackButton />
         {/* Welcome Section */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-gray-200 pb-5 gap-4">
           <div>

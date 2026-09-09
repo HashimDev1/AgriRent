@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import API from '../api/axios';
 import Sidebar from '../components/Sidebar';
 import LoadingSpinner from '../components/LoadingSpinner';
+import MobileBackButton from '../components/MobileBackButton';
 
 const Notifications = () => {
   const [notifications, setNotifications] = useState([]);
@@ -55,6 +56,7 @@ const Notifications = () => {
       <Sidebar role="farmer" /> {/* sidebar adjusts to local preferences, defaults to farmer/user links */}
 
       <main className="flex-1 p-6 md:p-8 space-y-6 max-w-4xl mx-auto overflow-hidden bg-white border-l border-gray-200">
+        <MobileBackButton />
         
         {/* Header */}
         <div className="flex justify-between items-center border-b border-gray-200 pb-5">

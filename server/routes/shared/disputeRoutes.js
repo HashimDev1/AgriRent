@@ -5,9 +5,10 @@ const {
   getMyDisputes,
 } = require('../../controllers/shared/disputeController');
 const { protect } = require('../../middleware/authMiddleware');
+const { uploadEvidenceImages } = require('../../middleware/upload');
 
 router.route('/')
-  .post(protect, createDispute);
+  .post(protect, uploadEvidenceImages, createDispute);
 
 router.get('/my', protect, getMyDisputes);
 

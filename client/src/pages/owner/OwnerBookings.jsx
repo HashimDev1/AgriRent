@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import API from '../../api/axios';
 import Sidebar from '../../components/Sidebar';
 import BookingCard from '../../components/BookingCard';
+import MobileBackButton from '../../components/MobileBackButton';
 import LoadingSpinner from '../../components/LoadingSpinner';
 
 const OwnerBookings = () => {
@@ -81,6 +82,7 @@ const OwnerBookings = () => {
       <Sidebar role="owner" />
 
       <main className="flex-1 p-6 md:p-8 space-y-6 max-w-7xl mx-auto overflow-hidden">
+        <MobileBackButton />
         
         {/* Title */}
         <div className="border-b border-gray-200 pb-5">

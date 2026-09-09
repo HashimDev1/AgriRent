@@ -37,15 +37,8 @@ export const AuthProvider = ({ children }) => {
     try {
       const res = await API.post('/auth/login', { email, password });
       localStorage.setItem('token', res.data.token);
-      setUser({
-        _id: res.data._id,
-        name: res.data.name,
-        email: res.data.email,
-        phone: res.data.phone,
-        role: res.data.role,
-        isVerified: res.data.isVerified,
-        isBlocked: res.data.isBlocked,
-      });
+      const { token, ...userData } = res.data;
+      setUser(userData);
       return res.data;
     } catch (err) {
       const errMsg = err.response?.data?.message || 'Login failed, check network connectivity.';
@@ -63,15 +56,8 @@ export const AuthProvider = ({ children }) => {
     try {
       const res = await API.post('/auth/register', userData);
       localStorage.setItem('token', res.data.token);
-      setUser({
-        _id: res.data._id,
-        name: res.data.name,
-        email: res.data.email,
-        phone: res.data.phone,
-        role: res.data.role,
-        isVerified: res.data.isVerified,
-        isBlocked: res.data.isBlocked,
-      });
+      const { token, ...userData } = res.data;
+      setUser(userData);
       return res.data;
     } catch (err) {
       const errMsg = err.response?.data?.message || 'Registration failed, verify your input fields.';

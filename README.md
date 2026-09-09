@@ -99,7 +99,63 @@ The routing and controller layers are modularized by actor roles to isolate busi
 
 ---
 
+## 🚀 Deploying to Render
+
+AgriRent is pre-configured to deploy on [Render](https://render.com) smoothly. You have two options:
+
+### 🌟 Option 1: Single Unified Web Service (Recommended)
+This deploys both the Node/Express backend and the React frontend in a single Render Web Service, fitting nicely within Render's free tier without CORS issues.
+
+1. **Push your code to GitHub** (make sure your repo is public or accessible to Render).
+2. Go to your [Render Dashboard](https://dashboard.render.com/) and click **New +** ➡️ **Web Service**.
+3. Connect your GitHub repository `HashimDev1/AgriRent`.
+4. Configure the service settings:
+   - **Name**: `agrirent` (or your preferred name)
+   - **Environment**: `Node`
+   - **Region**: Choose the closest region (e.g. Frankfurt, Oregon, Singapore)
+   - **Branch**: `main`
+   - **Root Directory**: *(Leave empty / root)*
+   - **Build Command**: `npm run build`
+   - **Start Command**: `npm start`
+5. In **Environment Variables**, add:
+   - `NODE_ENV` = `production`
+   - `MONGO_URI` = `mongodb+srv://<username>:<password>@cluster0.mongodb.net/agrirent?retryWrites=true&w=majority` *(Your MongoDB Atlas URI)*
+   - `JWT_SECRET` = *(Any random secure string, e.g. `agrirent_super_secure_key_2026`)*
+   - `CLOUDINARY_CLOUD_NAME` = *(Your Cloudinary cloud name, or leave blank to use mock image fallbacks)*
+   - `CLOUDINARY_API_KEY` = *(Your Cloudinary API key)*
+   - `CLOUDINARY_API_SECRET` = *(Your Cloudinary API secret)*
+6. Click **Create Web Service**.
+7. Once Render finishes building and deploying, click the public URL (e.g. `https://agrirent.onrender.com`). Your application is live!
+
+---
+
+### ⚡ Option 2: Render Blueprint (`render.yaml`)
+If you prefer 1-click infrastructure as code:
+1. In Render Dashboard, click **New +** ➡️ **Blueprint**.
+2. Select your `AgriRent` repository.
+3. Render reads `render.yaml` automatically and prompts you for the missing environment variables (`MONGO_URI`, Cloudinary keys).
+4. Click **Apply**.
+
+---
+
+### 🌾 Seeding Demo Data on Production (Optional)
+To seed initial categories, admin account, equipment listings, and demo users into your MongoDB Atlas database:
+1. Locally or in Render's Shell tab, run:
+   ```bash
+   MONGO_URI="your_mongodb_atlas_connection_string" npm run seed
+   ```
+2. You can then log in with:
+   - **Admin**: `admin@agrirent.com` / `admin123`
+   - **Owner**: `owner1@agrirent.com` / `password123`
+   - **Farmer**: `farmer1@agrirent.com` / `password123`
+
+---
+
+## 📷 Screenshots Placeholders
+*Screenshots can be added under `/client/public/screenshots/` to demonstrate home screen, dashboards, and booking modals.*
 
 ---
 
 *Note: This project is submitted for the Advanced Web Technologies MERN Stack Lab Terminal evaluation.*
+
+

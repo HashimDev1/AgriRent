@@ -10,90 +10,40 @@ const Home = () => {
   const [featured, setFeatured] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const getImageUrl = (image) => {
+    if (!image) return '';
+    return typeof image === 'object' && image.url ? image.url : image;
+  };
+
   // Search input parameters
   const [searchCity, setSearchCity] = useState('');
   const [searchCategory, setSearchCategory] = useState('');
   const [searchPriceRange, setSearchPriceRange] = useState('');
-
-  const categories = [
-    { value: 'tractor', label: 'Tractor', subtitle: 'Land preparation', icon: '🚜', img: 'https://images.unsplash.com/photo-1599819811279-d5ad9cccf838?auto=format&fit=crop&w=300&q=80' },
-    { value: 'harvester', label: 'Harvester', subtitle: 'Crop harvesting', icon: '🌾', img: 'https://images.unsplash.com/photo-1595246140625-568b29e0de45?auto=format&fit=crop&w=300&q=80' },
-    { value: 'seed_drill', label: 'Seed Drill', subtitle: 'Precision sowing', icon: '🌱', img: 'https://images.unsplash.com/photo-1605000797499-95a51c7769ae?auto=format&fit=crop&w=300&q=80' },
-    { value: 'sprayer', label: 'Sprayer', subtitle: 'Crop spraying', icon: '💧', img: 'https://images.unsplash.com/photo-1563514223725-41d19b15f40c?auto=format&fit=crop&w=300&q=80' },
-    { value: 'water_pump', label: 'Water Pump', subtitle: 'Irrigation support', icon: '🚿', img: 'https://images.unsplash.com/photo-1508962914676-134849a727f0?auto=format&fit=crop&w=300&q=80' },
-    { value: 'cultivator', label: 'Cultivator', subtitle: 'Soil aeration', icon: '⚙️', img: 'https://images.unsplash.com/photo-1594913785162-e6785b423cb1?auto=format&fit=crop&w=300&q=80' },
-    { value: 'plough', label: 'Plough', subtitle: 'Deep tilling', icon: '🛠️', img: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=300&q=80' },
-  ];
-
-  const defaultFeaturedPlaceholder = [
-    {
-      _id: 'dummy1',
-      title: 'Massey Ferguson Tractor 385',
-      category: 'tractor',
-      brand: 'Massey Ferguson',
-      rentPerDay: 5500,
-      securityDeposit: 12000,
-      averageRating: 4.8,
-      totalReviews: 12,
-      images: ['https://images.unsplash.com/photo-1599819811279-d5ad9cccf838?auto=format&fit=crop&w=600&q=80'],
-      location: { city: 'Sargodha', address: 'Bhalwal Road Bypass' }
-    },
-    {
-      _id: 'dummy2',
-      title: 'Kubota DC-70G Rice Harvester Pro',
-      category: 'harvester',
-      brand: 'Kubota',
-      rentPerDay: 13000,
-      securityDeposit: 25000,
-      averageRating: 4.9,
-      totalReviews: 8,
-      images: ['https://images.unsplash.com/photo-1595246140625-568b29e0de45?auto=format&fit=crop&w=600&q=80'],
-      location: { city: 'Multan', address: 'Vehari Road' }
-    },
-    {
-      _id: 'dummy3',
-      title: 'Peter Diesel Water Pump 4-Inch',
-      category: 'water_pump',
-      brand: 'Peter',
-      rentPerDay: 1600,
-      securityDeposit: 3000,
-      averageRating: 4.5,
-      totalReviews: 15,
-      images: ['https://images.unsplash.com/photo-1508962914676-134849a727f0?auto=format&fit=crop&w=600&q=80'],
-      location: { city: 'Faisalabad', address: 'Jhang Road' }
-    },
-    {
-      _id: 'dummy4',
-      title: 'Millat Heavy Duty Cultivator 11-Tine',
-      category: 'cultivator',
-      brand: 'Millat',
-      rentPerDay: 1900,
-      securityDeposit: 4000,
-      averageRating: 4.6,
-      totalReviews: 5,
-      images: ['https://images.unsplash.com/photo-1594913785162-e6785b423cb1?auto=format&fit=crop&w=600&q=80'],
-      location: { city: 'Sahiwal', address: 'Main Bypass' }
-    }
-  ];
+  const [categories, setCategories] = useState([]);
 
   useEffect(() => {
-    const fetchFeatured = async () => {
+    const fetchHomeData = async () => {
       try {
-        const res = await API.get('/equipment');
-        const approvedOnly = res.data.filter((e) => e.status === 'approved');
+        const [equipRes, catRes] = await Promise.all([
+          API.get('/equipment'),
+          API.get('/categories')
+        ]);
+
+        const approvedOnly = equipRes.data.filter((e) => e.status === 'approved');
         if (approvedOnly.length > 0) {
           setFeatured(approvedOnly.slice(0, 4));
         } else {
           setFeatured(defaultFeaturedPlaceholder);
         }
+
+        setCategories(catRes.data);
       } catch (err) {
-        console.error('Failed to load featured equipment:', err);
-        setFeatured(defaultFeaturedPlaceholder);
+        console.error('Failed to load home page data:', err);
       } finally {
         setLoading(false);
       }
     };
-    fetchFeatured();
+    fetchHomeData();
   }, []);
 
   const handleSearchSubmit = (e) => {
@@ -124,7 +74,7 @@ const Home = () => {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             
             {/* Left Column content */}
-            <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
+            <div className="lg:col-span-8 relative z-10 space-y-6 text-center lg:text-left">
               <span className="inline-flex items-center px-3.5 py-1.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-100 shadow-2xs">
                 🌾 Pakistan’s Premium Farm Equipment Rental Marketplace
               </span>
@@ -157,63 +107,33 @@ const Home = () => {
               {/* Trust Indicators */}
               <div className="pt-6 grid grid-cols-3 gap-2 max-w-lg mx-auto lg:mx-0 border-t border-gray-200 text-center lg:text-left">
                 <div className="space-y-1">
-                  <span className="text-emerald-700 font-extrabold text-sm block">🛡️ Verified Owners</span>
+                  <span className="text-emerald-700 font-extrabold text-sm block"> Verified Owners</span>
                   <span className="text-[10px] text-slate-400 font-semibold block">CNIC & listing approved</span>
                 </div>
                 <div className="space-y-1 border-x border-gray-200 px-2">
-                  <span className="text-emerald-700 font-extrabold text-sm block">💰 Fair Pricing</span>
+                  <span className="text-emerald-700 font-extrabold text-sm block"> Fair Pricing</span>
                   <span className="text-[10px] text-slate-400 font-semibold block">Transparent daily rates</span>
                 </div>
                 <div className="space-y-1">
-                  <span className="text-emerald-700 font-extrabold text-sm block">⚡ Fast Booking</span>
+                  <span className="text-emerald-700 font-extrabold text-sm block"> Fast Booking</span>
                   <span className="text-[10px] text-slate-400 font-semibold block">Direct owner approvals</span>
                 </div>
               </div>
             </div>
 
-            {/* Right Column: Visual Machinery Grid with Stats */}
-            <div className="lg:col-span-5 relative mt-6 lg:mt-0 flex justify-center">
-              <div className="bg-white p-3 rounded-[32px] border border-gray-150 shadow-xl lg:shadow-2xl relative w-full max-w-[420px]">
-                <div className="relative w-full aspect-square rounded-[24px] overflow-hidden group">
-                  <img
-                    src="https://images.unsplash.com/photo-1595246140625-568b29e0de45?auto=format&fit=crop&w=700&q=80"
-                    alt="Harvesting tractors in fields"
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src = 'https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=600&q=80';
-                    }}
-                  />
-                  {/* Subtle dark overlay */}
-                  <div className="absolute inset-0 bg-slate-950/15 pointer-events-none"></div>
-                </div>
-                
-                {/* Floating stat card 1 */}
-                <div className="absolute top-6 -left-6 bg-white/95 backdrop-blur-md text-slate-800 p-3 rounded-2xl shadow-lg border border-gray-150 flex items-center space-x-2.5 animate-bounce" style={{ animationDuration: '4s' }}>
-                  <span className="text-xl p-1.5 bg-emerald-50 rounded-lg">📈</span>
-                  <div>
-                    <span className="font-extrabold text-sm text-slate-900 block">500+</span>
-                    <span className="text-[10px] text-slate-500 font-bold block">Rentals Fulfilled</span>
-                  </div>
-                </div>
+          </div>
 
-                {/* Floating stat card 2 */}
-                <div className="absolute bottom-16 -right-6 bg-white/95 backdrop-blur-md text-slate-800 p-3 rounded-2xl shadow-lg border border-gray-150 flex items-center space-x-2.5 animate-bounce" style={{ animationDuration: '6s' }}>
-                  <span className="text-xl p-1.5 bg-green-50 rounded-lg">🚜</span>
-                  <div>
-                    <span className="font-extrabold text-sm text-slate-900 block">120+</span>
-                    <span className="text-[10px] text-slate-500 font-bold block">Verified Owners</span>
-                  </div>
-                </div>
-
-                {/* Floating stat card 3 */}
-                <div className="absolute -bottom-4 left-6 bg-emerald-900/95 backdrop-blur-md text-white p-3 rounded-2xl shadow-lg border border-emerald-800 flex items-center space-x-2.5">
-                  <span className="text-lg">🕒</span>
-                  <span className="text-[10px] font-bold text-emerald-100">24/7 Dispute Support</span>
-                </div>
-              </div>
-            </div>
-
+          {/* Right Column: Visual Machinery Image (Absolute Positioning behind text if screen narrows) */}
+          <div className="hidden lg:block absolute right-0 lg:-right-40 top-1/2 -translate-y-1/2 w-[60%] max-w-[880px] h-[600px] pointer-events-none z-0">
+            <img
+              src="https://res.cloudinary.com/hashim055/image/upload/q_auto/f_auto/v1781218972/Create_an_isolated_3D_transparent_202606120355-Photoroom_ffqe8v.png"
+              alt="Harvesting tractors in fields"
+              className="w-full h-full object-contain object-right transition-transform duration-700 hover:scale-105"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = 'https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=600&q=80';
+              }}
+            />
           </div>
         </div>
       </div>
@@ -309,7 +229,7 @@ const Home = () => {
             >
               <div className="h-32 bg-gray-50 overflow-hidden relative">
                 <img
-                  src={cat.img}
+                  src={typeof cat.img === 'object' && cat.img ? cat.img.url : cat.img}
                   alt={cat.label}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   onError={(e) => {
@@ -409,7 +329,7 @@ const Home = () => {
                 {/* Image */}
                 <div className="relative h-44 bg-gray-100 overflow-hidden">
                   <img
-                    src={item.images?.[0] || 'https://images.unsplash.com/photo-1599819811279-d5ad9cccf838?auto=format&fit=crop&w=600&q=80'}
+                    src={getImageUrl(item.images?.[0]) || 'https://images.unsplash.com/photo-1599819811279-d5ad9cccf838?auto=format&fit=crop&w=600&q=80'}
                     alt={item.title}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     onError={(e) => {
@@ -492,7 +412,7 @@ const Home = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Card 1 */}
           <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-3xs space-y-3 hover-card">
-            <span className="text-3xl block p-2 bg-primary-50 rounded-xl w-fit">🛡️</span>
+            {/* <span className="text-3xl block p-2 bg-primary-50 rounded-xl w-fit">🛡️</span> */}
             <h4 className="font-extrabold text-gray-850 text-sm">Verified Equipment Owners</h4>
             <p className="text-xs text-gray-450 leading-relaxed">
               Every equipment owner uploads CNIC credentials and listing details checked by administrators.
@@ -501,7 +421,7 @@ const Home = () => {
 
           {/* Card 2 */}
           <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-3xs space-y-3 hover-card">
-            <span className="text-3xl block p-2 bg-earth-50 rounded-xl w-fit">💰</span>
+            {/* <span className="text-3xl block p-2 bg-earth-50 rounded-xl w-fit">💰</span> */}
             <h4 className="font-extrabold text-gray-850 text-sm">Transparent Daily Rent</h4>
             <p className="text-xs text-gray-450 leading-relaxed">
               Rent features clearly display rent-per-day rates and security deposits with zero hidden operational fees.
@@ -510,7 +430,7 @@ const Home = () => {
 
           {/* Card 3 */}
           <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-3xs space-y-3 hover-card">
-            <span className="text-3xl block p-2 bg-blue-50 rounded-xl w-fit">📦</span>
+            {/* <span className="text-3xl block p-2 bg-blue-50 rounded-xl w-fit">📦</span> */}
             <h4 className="font-extrabold text-gray-850 text-sm">Booking Status Tracking</h4>
             <p className="text-xs text-gray-450 leading-relaxed">
               Monitor your booking states step-by-step from pending request to active delivery pickup.
@@ -519,7 +439,7 @@ const Home = () => {
 
           {/* Card 4 */}
           <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-3xs space-y-3 hover-card">
-            <span className="text-3xl block p-2 bg-purple-50 rounded-xl w-fit">⚖️</span>
+            {/* <span className="text-3xl block p-2 bg-purple-50 rounded-xl w-fit">⚖️</span> */}
             <h4 className="font-extrabold text-gray-850 text-sm">Damage & Dispute Support</h4>
             <p className="text-xs text-gray-450 leading-relaxed">
               Admin arbitrates damage disputes using evidence images and description reports to keep both sides secure.

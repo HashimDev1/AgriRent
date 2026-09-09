@@ -14,6 +14,13 @@ const {
 const { protect } = require('../../middleware/authMiddleware');
 const { authorize } = require('../../middleware/roleMiddleware');
 
+const {
+  updateCategory,
+  createCategory,
+  deleteCategory,
+} = require('../../controllers/admin/categoryController');
+const { uploadCategoryImage } = require('../../middleware/upload');
+
 // All admin routes are protected by admin authorization
 router.use(protect);
 router.use(authorize('admin'));
@@ -27,5 +34,8 @@ router.put('/equipment/:id/approve', approveEquipment);
 router.put('/equipment/:id/reject', rejectEquipment);
 router.get('/disputes', getAdminDisputes);
 router.put('/disputes/:id/resolve', resolveDispute);
+router.post('/categories', uploadCategoryImage, createCategory);
+router.put('/categories/:id', uploadCategoryImage, updateCategory);
+router.delete('/categories/:id', deleteCategory);
 
 module.exports = router;

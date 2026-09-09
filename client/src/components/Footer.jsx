@@ -32,7 +32,7 @@ const Footer = () => {
           </div>
 
           {/* Column 2: Quick Links */}
-          <div>
+          <div className="hidden md:block">
             <h4 className="font-bold text-white text-xs uppercase tracking-wider mb-4 pb-1.5 border-b border-emerald-800/40 inline-block">
               Quick Links
             </h4>
@@ -47,7 +47,7 @@ const Footer = () => {
           </div>
 
           {/* Column 3: Services */}
-          <div>
+          <div className="hidden md:block">
             <h4 className="font-bold text-white text-xs uppercase tracking-wider mb-4 pb-1.5 border-b border-emerald-800/40 inline-block">
               Fleet Services
             </h4>
@@ -62,7 +62,7 @@ const Footer = () => {
           </div>
 
           {/* Column 4: Support */}
-          <div>
+          <div className="hidden md:block">
             <h4 className="font-bold text-white text-xs uppercase tracking-wider mb-4 pb-1.5 border-b border-emerald-800/40 inline-block">
               Support & Guide
             </h4>

@@ -29,12 +29,20 @@ const UserSchema = new mongoose.Schema(
       default: 'farmer',
     },
     profileImage: {
-      type: String,
+      type: mongoose.Schema.Types.Mixed,
       default: '',
     },
     cnicNumber: {
       type: String,
       default: '',
+    },
+    cnicFrontImage: {
+      type: mongoose.Schema.Types.Mixed,
+      default: null,
+    },
+    cnicBackImage: {
+      type: mongoose.Schema.Types.Mixed,
+      default: null,
     },
     address: {
       type: String,

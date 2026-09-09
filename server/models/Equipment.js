@@ -38,7 +38,7 @@ const EquipmentSchema = new mongoose.Schema(
       default: 0,
     },
     images: {
-      type: [String],
+      type: [mongoose.Schema.Types.Mixed],
       default: [],
     },
     location: {

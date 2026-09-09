@@ -3,6 +3,7 @@ import API from '../api/axios';
 import Sidebar from '../components/Sidebar';
 import StatusBadge from '../components/StatusBadge';
 import LoadingSpinner from '../components/LoadingSpinner';
+import MobileBackButton from '../components/MobileBackButton';
 
 const Disputes = () => {
   const [disputes, setDisputes] = useState([]);
@@ -35,6 +36,7 @@ const Disputes = () => {
       <Sidebar role={localStorage.getItem('token') ? (disputes[0]?.createdBy?.role === 'owner' ? 'owner' : 'farmer') : 'farmer'} />
 
       <main className="flex-1 p-6 md:p-8 space-y-6 max-w-7xl mx-auto overflow-hidden">
+        <MobileBackButton />
         
         {/* Title */}
         <div className="border-b border-gray-200 pb-5">

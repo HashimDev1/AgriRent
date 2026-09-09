@@ -1,16 +1,24 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import API from '../api/axios';
 
 const SearchFilters = ({ filters, onChange, onSearch, onClear }) => {
-  const categories = [
+  const [dbCategories, setDbCategories] = useState([]);
+
+  useEffect(() => {
+    const fetchCats = async () => {
+      try {
+        const res = await API.get('/categories');
+        setDbCategories(res.data);
+      } catch (err) {
+        console.error('Failed to load filter categories:', err);
+      }
+    };
+    fetchCats();
+  }, []);
+
+  const categoriesList = [
     { value: '', label: 'All Categories' },
-    { value: 'tractor', label: 'Tractor 🚜' },
-    { value: 'harvester', label: 'Harvester 🌾' },
-    { value: 'seed_drill', label: 'Seed Drill 🌱' },
-    { value: 'sprayer', label: 'Sprayer 💧' },
-    { value: 'water_pump', label: 'Water Pump 🚿' },
-    { value: 'cultivator', label: 'Cultivator ⚙️' },
-    { value: 'plough', label: 'Plough 🛠️' },
-    { value: 'other', label: 'Other Machinery 🚜' },
+    ...dbCategories.map((c) => ({ value: c.value, label: `${c.label} ${c.icon || '🚜'}` })),
   ];
 
   const sortingOptions = [
@@ -82,7 +90,7 @@ const SearchFilters = ({ filters, onChange, onSearch, onClear }) => {
             onChange={handleInputChange}
             className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-1 focus:ring-primary-500 bg-gray-50/50"
           >
-            {categories.map((c) => (
+             {categoriesList.map((c) => (
               <option key={c.value} value={c.value}>
                 {c.label}
               </option>

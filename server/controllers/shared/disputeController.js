@@ -1,13 +1,14 @@
 const Dispute = require('../../models/Dispute');
 const Booking = require('../../models/Booking');
 const Notification = require('../../models/Notification');
+const { uploadStream } = require('../../config/cloudinary');
 
 // @desc    Lodge a new dispute
 // @route   POST /api/disputes
 // @access  Private
 const createDispute = async (req, res) => {
   try {
-    const { bookingId, reason, description, evidenceImages } = req.body;
+    const { bookingId, reason, description } = req.body;
 
     if (!bookingId || !reason || !description) {
       return res.status(400).json({ message: 'Booking ID, reason, and description are required' });
@@ -28,6 +29,31 @@ const createDispute = async (req, res) => {
       return res.status(403).json({ message: 'You are not a participant in this booking' });
     }
 
+    // Handle existing images
+    let bodyImages = [];
+    if (req.body.evidenceImages) {
+      try {
+        bodyImages = typeof req.body.evidenceImages === 'string'
+          ? JSON.parse(req.body.evidenceImages)
+          : req.body.evidenceImages;
+      } catch (err) {
+        bodyImages = Array.isArray(req.body.evidenceImages) ? req.body.evidenceImages : [req.body.evidenceImages];
+      }
+    }
+    if (!Array.isArray(bodyImages)) {
+      bodyImages = [bodyImages];
+    }
+    bodyImages = bodyImages.filter(img => img);
+
+    // Upload files to Cloudinary
+    let uploadedImages = [];
+    if (req.files && req.files.length > 0) {
+      const uploadPromises = req.files.map(file => uploadStream(file.buffer, 'agrirent/disputes'));
+      uploadedImages = await Promise.all(uploadPromises);
+    }
+
+    const finalImages = [...bodyImages, ...uploadedImages];
+
     const dispute = new Dispute({
       bookingId,
       equipmentId: booking.equipmentId,
@@ -35,7 +61,7 @@ const createDispute = async (req, res) => {
       againstUserId,
       reason,
       description,
-      evidenceImages: Array.isArray(evidenceImages) ? evidenceImages : (evidenceImages ? [evidenceImages] : []),
+      evidenceImages: finalImages,
       status: 'open',
     });
 

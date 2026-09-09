@@ -76,7 +76,7 @@ const Reviews = () => {
               <div className="flex justify-between items-center">
                 <div className="flex items-center space-x-2">
                   <img
-                    src={rev.reviewerId?.profileImage || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80'}
+                    src={(rev.reviewerId?.profileImage?.url || rev.reviewerId?.profileImage) || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80'}
                     alt={rev.reviewerId?.name}
                     className="w-6 h-6 rounded-full object-cover"
                   />

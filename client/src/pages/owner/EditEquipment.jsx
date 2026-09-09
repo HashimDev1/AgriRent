@@ -3,20 +3,21 @@ import { useNavigate, useParams } from 'react-router-dom';
 import API from '../../api/axios';
 import Sidebar from '../../components/Sidebar';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import MobileBackButton from '../../components/MobileBackButton';
 
 const EditEquipment = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [categories, setCategories] = useState([]);
 
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    category: 'tractor',
+    category: '',
     brand: '',
     model: '',
     rentPerDay: '',
     securityDeposit: '',
-    imageUrl: '',
     address: '',
     city: '',
     longitude: '',
@@ -27,9 +28,23 @@ const EditEquipment = () => {
   });
 
   const [imagesList, setImagesList] = useState([]);
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [previews, setPreviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    const fetchCats = async () => {
+      try {
+        const res = await API.get('/categories');
+        setCategories(res.data);
+      } catch (err) {
+        console.error('Failed to load categories:', err);
+      }
+    };
+    fetchCats();
+  }, []);
 
   useEffect(() => {
     const fetchEquipment = async () => {
@@ -45,7 +60,6 @@ const EditEquipment = () => {
           model: eq.model || '',
           rentPerDay: eq.rentPerDay || '',
           securityDeposit: eq.securityDeposit || '',
-          imageUrl: '',
           address: eq.location?.address || '',
           city: eq.location?.city || '',
           longitude: eq.location?.coordinates?.[0]?.toString() || '',
@@ -73,15 +87,43 @@ const EditEquipment = () => {
     setError('');
   };
 
-  const handleAddImage = () => {
-    if (formData.imageUrl.trim() !== '') {
-      setImagesList([...imagesList, formData.imageUrl.trim()]);
-      setFormData({ ...formData, imageUrl: '' });
+  const handleFileChange = (e) => {
+    const files = Array.from(e.target.files);
+
+    if (imagesList.length + selectedFiles.length + files.length > 5) {
+      alert('You can upload a maximum of 5 images total.');
+      return;
     }
+
+    const validFiles = [];
+    const newPreviews = [];
+
+    for (const file of files) {
+      if (!file.type.startsWith('image/')) {
+        alert(`${file.name} is not an image file.`);
+        continue;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        alert(`${file.name} exceeds the 5MB size limit.`);
+        continue;
+      }
+      validFiles.push(file);
+      newPreviews.push(URL.createObjectURL(file));
+    }
+
+    setSelectedFiles((prev) => [...prev, ...validFiles]);
+    setPreviews((prev) => [...prev, ...newPreviews]);
+    setError('');
   };
 
-  const handleRemoveImage = (index) => {
+  const handleRemoveExistingImage = (index) => {
     setImagesList(imagesList.filter((_, i) => i !== index));
+  };
+
+  const handleRemoveNewImage = (index) => {
+    URL.revokeObjectURL(previews[index]);
+    setSelectedFiles(selectedFiles.filter((_, i) => i !== index));
+    setPreviews(previews.filter((_, i) => i !== index));
   };
 
   const getGPSLocation = () => {
@@ -114,13 +156,25 @@ const EditEquipment = () => {
 
     setSubmitLoading(true);
     try {
-      await API.put(`/equipment/${id}`, {
-        ...formData,
-        images: imagesList,
-        rentPerDay: parseFloat(formData.rentPerDay),
-        securityDeposit: formData.securityDeposit ? parseFloat(formData.securityDeposit) : 0,
-        longitude: parseFloat(formData.longitude),
-        latitude: parseFloat(formData.latitude),
+      const data = new FormData();
+
+      // Append normal form fields
+      Object.keys(formData).forEach((key) => {
+        data.append(key, formData[key]);
+      });
+
+      // Append existing images JSON list
+      data.append('images', JSON.stringify(imagesList));
+
+      // Append new files
+      selectedFiles.forEach((file) => {
+        data.append('images', file);
+      });
+
+      await API.put(`/equipment/${id}`, data, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       });
 
       alert('Equipment listing updated successfully! Requires admin re-verification.');
@@ -145,6 +199,7 @@ const EditEquipment = () => {
       <Sidebar role="owner" />
 
       <main className="flex-1 p-6 md:p-8 space-y-6 max-w-4xl mx-auto overflow-hidden bg-white border-l border-gray-200">
+        <MobileBackButton />
         
         {/* Title */}
         <div className="border-b border-gray-200 pb-4 flex justify-between items-center">
@@ -200,14 +255,11 @@ const EditEquipment = () => {
                   onChange={handleChange}
                   className="w-full border border-gray-300 rounded-lg p-2.5 bg-gray-50/50"
                 >
-                  <option value="tractor">Tractor 🚜</option>
-                  <option value="harvester">Harvester 🌾</option>
-                  <option value="seed_drill">Seed Drill 🌱</option>
-                  <option value="sprayer">Sprayer 💧</option>
-                  <option value="water_pump">Water Pump 🚿</option>
-                  <option value="cultivator">Cultivator ⚙️</option>
-                  <option value="plough">Plough 🛠️</option>
-                  <option value="other">Other ⚙️</option>
+                  {categories.map((c) => (
+                    <option key={c.value} value={c.value}>
+                      {c.label} {c.icon || '🚜'}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
@@ -367,38 +419,61 @@ const EditEquipment = () => {
           <div className="space-y-4 pt-4 border-t border-gray-100">
             <h3 className="text-base font-extrabold text-gray-800 border-b border-gray-100 pb-2">Fleet Images</h3>
             
-            <div className="flex gap-2">
+            <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-xl p-6 bg-gray-50 hover:bg-gray-100/50 transition-colors cursor-pointer relative">
               <input
-                type="text"
-                name="imageUrl"
-                placeholder="Paste Image URL..."
-                value={formData.imageUrl}
-                onChange={handleChange}
-                className="flex-grow border border-gray-300 rounded-lg p-2.5 bg-gray-50/50"
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={handleFileChange}
+                className="absolute inset-0 opacity-0 cursor-pointer"
               />
-              <button
-                type="button"
-                onClick={handleAddImage}
-                className="bg-primary-600 hover:bg-primary-700 text-white font-bold px-4 py-2 rounded-lg text-xs"
-              >
-                + Add URL
-              </button>
+              <span className="text-3xl mb-2">📸</span>
+              <span className="text-xs text-gray-500 font-bold text-center">Click to upload new images (Max 5 total)</span>
+              <span className="text-[10px] text-gray-400 mt-1">Only image formats under 5MB are supported</span>
             </div>
 
+            {/* Existing Images */}
             {imagesList.length > 0 && (
-              <div className="grid grid-cols-4 gap-3 pt-2">
-                {imagesList.map((img, idx) => (
-                  <div key={idx} className="relative rounded-lg overflow-hidden border border-gray-200 aspect-video h-16">
-                    <img src={img} alt="" className="w-full h-full object-cover" />
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveImage(idx)}
-                      className="absolute top-1 right-1 bg-red-600 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center shadow-xs"
-                    >
-                      ×
-                    </button>
-                  </div>
-                ))}
+              <div className="space-y-2">
+                <span className="text-xs font-bold text-gray-400 block">Current Images:</span>
+                <div className="grid grid-cols-4 gap-3">
+                  {imagesList.map((img, idx) => {
+                    const url = typeof img === 'object' ? img.url : img;
+                    return (
+                      <div key={idx} className="relative rounded-lg overflow-hidden border border-gray-200 aspect-video h-16 bg-gray-50">
+                        <img src={url} alt="" className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveExistingImage(idx)}
+                          className="absolute top-1 right-1 bg-red-600 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center shadow-xs hover:bg-red-700 transition-colors"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* New Previews */}
+            {previews.length > 0 && (
+              <div className="space-y-2 pt-2 border-t border-gray-100">
+                <span className="text-xs font-bold text-gray-400 block">New Uploads Preview:</span>
+                <div className="grid grid-cols-4 gap-3">
+                  {previews.map((img, idx) => (
+                    <div key={idx} className="relative rounded-lg overflow-hidden border border-gray-200 aspect-video h-16 bg-gray-50">
+                      <img src={img} alt="" className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveNewImage(idx)}
+                        className="absolute top-1 right-1 bg-red-600 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center shadow-xs hover:bg-red-700 transition-colors"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>

@@ -13,6 +13,7 @@ import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
 import FarmerDashboard from './pages/farmer/FarmerDashboard';
 import OwnerDashboard from './pages/owner/OwnerDashboard';
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -31,10 +32,12 @@ import Profile from './pages/Profile';
 import NotFound from './pages/NotFound';
 
 import Footer from './components/Footer';
+import ScrollToTop from './components/ScrollToTop';
 
 function App() {
   return (
     <Router>
+      <ScrollToTop />
       <AuthProvider>
         <div className="flex flex-col min-h-screen bg-gray-50 text-gray-800">
           <Navbar />
@@ -44,6 +47,7 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/equipment" element={<EquipmentList />} />
               <Route path="/equipment/:id" element={<EquipmentDetails />} />
               <Route path="/reviews" element={<Reviews />} />

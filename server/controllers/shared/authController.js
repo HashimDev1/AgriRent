@@ -52,6 +52,12 @@ const registerUser = async (req, res) => {
         email: user.email,
         phone: user.phone,
         role: user.role,
+        profileImage: user.profileImage,
+        cnicNumber: user.cnicNumber,
+        cnicFrontImage: user.cnicFrontImage,
+        cnicBackImage: user.cnicBackImage,
+        address: user.address,
+        location: user.location,
         isVerified: user.isVerified,
         isBlocked: user.isBlocked,
         token: generateToken(user._id),
@@ -96,6 +102,12 @@ const loginUser = async (req, res) => {
         email: user.email,
         phone: user.phone,
         role: user.role,
+        profileImage: user.profileImage,
+        cnicNumber: user.cnicNumber,
+        cnicFrontImage: user.cnicFrontImage,
+        cnicBackImage: user.cnicBackImage,
+        address: user.address,
+        location: user.location,
         isVerified: user.isVerified,
         isBlocked: user.isBlocked,
         token: generateToken(user._id),
@@ -125,8 +137,38 @@ const getMe = async (req, res) => {
   }
 };
 
+// @desc    Reset password for forgotten credentials
+// @route   POST /api/auth/forgot-password
+// @access  Public
+const forgotPassword = async (req, res) => {
+  try {
+    const { email, phone, newPassword } = req.body;
+
+    if (!email || !phone || !newPassword) {
+      return res.status(400).json({ message: 'Please provide email, phone, and new password' });
+    }
+
+    const user = await User.findOne({ email, phone });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found with matching email and phone number' });
+    }
+
+    // Hash the new password
+    const salt = await bcrypt.genSalt(10);
+    user.passwordHash = await bcrypt.hash(newPassword, salt);
+    await user.save();
+
+    res.json({ message: 'Password reset successfully. You can now login.' });
+  } catch (error) {
+    console.error('Forgot Password Error:', error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
   getMe,
+  forgotPassword,
 };

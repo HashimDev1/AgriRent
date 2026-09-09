@@ -25,6 +25,8 @@ const EquipmentList = () => {
     maxDistance: '50000',
   });
 
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
+
   const fetchEquipment = async (params = filters) => {
     setLoading(true);
     try {
@@ -62,6 +64,7 @@ const EquipmentList = () => {
 
   const handleSearchSubmit = () => {
     fetchEquipment();
+    setShowMobileFilters(false);
   };
 
   const handleClearFilters = () => {
@@ -80,6 +83,7 @@ const EquipmentList = () => {
     };
     setFilters(cleared);
     fetchEquipment(cleared);
+    setShowMobileFilters(false);
   };
 
   return (
@@ -93,10 +97,20 @@ const EquipmentList = () => {
         </p>
       </div>
 
+      {/* Mobile Toggle Button */}
+      <div className="lg:hidden">
+        <button
+          onClick={() => setShowMobileFilters(!showMobileFilters)}
+          className="w-full flex items-center justify-center space-x-2 bg-primary-50 text-primary-700 border border-primary-150 hover:bg-primary-100/70 font-bold py-3 px-4 rounded-xl transition-all text-xs uppercase tracking-wider shadow-2xs"
+        >
+          <span>{showMobileFilters ? '❌ Hide Search & Filters' : '🔍 Filter & Search Machinery'}</span>
+        </button>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         
         {/* Left Filter Sidebar */}
-        <div className="lg:col-span-1">
+        <div className={`lg:col-span-1 ${showMobileFilters ? 'block' : 'hidden lg:block'}`}>
           <SearchFilters
             filters={filters}
             onChange={handleFilterChange}

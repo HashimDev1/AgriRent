@@ -32,7 +32,7 @@ const DisputeSchema = new mongoose.Schema(
       required: true,
     },
     evidenceImages: {
-      type: [String],
+      type: [mongoose.Schema.Types.Mixed],
       default: [],
     },
     status: {

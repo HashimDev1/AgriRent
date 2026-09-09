@@ -3,6 +3,7 @@ import API from '../api/axios';
 import { AuthContext } from '../context/AuthContext';
 import Sidebar from '../components/Sidebar';
 import LoadingSpinner from '../components/LoadingSpinner';
+import MobileBackButton from '../components/MobileBackButton';
 
 const Profile = () => {
   const { user, refreshUser } = useContext(AuthContext);
@@ -18,6 +19,13 @@ const Profile = () => {
     password: '',
   });
 
+  const [cnicFrontFile, setCnicFrontFile] = useState(null);
+  const [cnicBackFile, setCnicBackFile] = useState(null);
+  const [cnicFrontPreview, setCnicFrontPreview] = useState('');
+  const [cnicBackPreview, setCnicBackPreview] = useState('');
+  const [profileFile, setProfileFile] = useState(null);
+  const [profilePreview, setProfilePreview] = useState('');
+
   const [loading, setLoading] = useState(true);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [error, setError] = useState('');
@@ -28,13 +36,16 @@ const Profile = () => {
       setFormData({
         name: user.name || '',
         phone: user.phone || '',
-        profileImage: user.profileImage || '',
+        profileImage: user.profileImage ? (user.profileImage.url || user.profileImage) : '',
         cnicNumber: user.cnicNumber || '',
         address: user.address || '',
         longitude: user.location?.coordinates?.[0]?.toString() || '0',
         latitude: user.location?.coordinates?.[1]?.toString() || '0',
         password: '',
       });
+      setCnicFrontPreview(user.cnicFrontImage ? (user.cnicFrontImage.url || user.cnicFrontImage) : '');
+      setCnicBackPreview(user.cnicBackImage ? (user.cnicBackImage.url || user.cnicBackImage) : '');
+      setProfilePreview(user.profileImage ? (user.profileImage.url || user.profileImage) : '');
       setLoading(false);
     }
   }, [user]);
@@ -43,6 +54,60 @@ const Profile = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     setError('');
     setSuccess('');
+  };
+
+  const handleFrontFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file.');
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        alert('File size exceeds 5MB limit.');
+        return;
+      }
+      setCnicFrontFile(file);
+      setCnicFrontPreview(URL.createObjectURL(file));
+      setError('');
+      setSuccess('');
+    }
+  };
+
+  const handleBackFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file.');
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        alert('File size exceeds 5MB limit.');
+        return;
+      }
+      setCnicBackFile(file);
+      setCnicBackPreview(URL.createObjectURL(file));
+      setError('');
+      setSuccess('');
+    }
+  };
+
+  const handleProfileFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file.');
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        alert('File size exceeds 5MB limit.');
+        return;
+      }
+      setProfileFile(file);
+      setProfilePreview(URL.createObjectURL(file));
+      setError('');
+      setSuccess('');
+    }
   };
 
   const getGPSLocation = () => {
@@ -72,10 +137,25 @@ const Profile = () => {
     setSuccess('');
 
     try {
-      await API.put('/users/profile', {
-        ...formData,
-        longitude: parseFloat(formData.longitude),
-        latitude: parseFloat(formData.latitude),
+      const data = new FormData();
+      Object.keys(formData).forEach((key) => {
+        data.append(key, formData[key]);
+      });
+
+      if (cnicFrontFile) {
+        data.append('cnicFrontImage', cnicFrontFile);
+      }
+      if (cnicBackFile) {
+        data.append('cnicBackImage', cnicBackFile);
+      }
+      if (profileFile) {
+        data.append('profileImage', profileFile);
+      }
+
+      await API.put('/users/profile', data, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       });
 
       await refreshUser(); // refresh AuthContext state
@@ -101,6 +181,7 @@ const Profile = () => {
       <Sidebar role={user?.role || 'farmer'} />
 
       <main className="flex-1 p-6 md:p-8 space-y-6 max-w-4xl mx-auto overflow-hidden bg-white border-l border-gray-200">
+        <MobileBackButton />
         
         {/* Title */}
         <div className="border-b border-gray-200 pb-5">
@@ -123,6 +204,31 @@ const Profile = () => {
 
         <form onSubmit={handleSubmit} className="space-y-6 text-sm">
           
+          {/* Profile Picture Upload Section */}
+          <div className="flex flex-col items-center justify-center space-y-3 pb-6 border-b border-gray-100">
+            <div className="relative group w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-lg cursor-pointer transition-all duration-300 hover:shadow-xl hover:scale-105">
+              <img
+                src={profilePreview || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80'}
+                alt="Profile Avatar"
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <span className="text-2xl text-white">📷</span>
+                <span className="text-[10px] text-white font-bold mt-1 uppercase tracking-wider">Change Photo</span>
+              </div>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleProfileFileChange}
+                className="absolute inset-0 opacity-0 cursor-pointer"
+              />
+            </div>
+            <div className="text-center">
+              <span className="text-xs text-gray-500 font-bold block">Upload Profile Photo</span>
+              <span className="text-[10px] text-gray-400 block mt-0.5">JPG, PNG or GIF. Max size 5MB.</span>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="text-xs text-gray-400 font-bold block mb-1">Full Name</label>
@@ -167,6 +273,49 @@ const Profile = () => {
                 onChange={handleChange}
                 className="w-full border border-gray-300 rounded-lg p-2.5 bg-gray-50/50"
               />
+            </div>
+          </div>
+
+          {/* CNIC Upload Section */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-gray-100 pt-4">
+            <div>
+              <label className="text-xs text-gray-400 font-bold block mb-1">CNIC Front Image</label>
+              <div className="flex flex-col items-center justify-center border border-dashed border-gray-300 rounded-lg p-4 bg-gray-50/50 cursor-pointer relative min-h-[120px] hover:bg-gray-100/50 transition-colors">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFrontFileChange}
+                  className="absolute inset-0 opacity-0 cursor-pointer"
+                />
+                {cnicFrontPreview ? (
+                  <img src={cnicFrontPreview} alt="CNIC Front Preview" className="w-full h-24 object-contain rounded-md" />
+                ) : (
+                  <>
+                    <span className="text-xl">💳</span>
+                    <span className="text-[10px] text-gray-500 font-bold mt-1 text-center">Upload Front Side</span>
+                  </>
+                )}
+              </div>
+            </div>
+
+            <div>
+              <label className="text-xs text-gray-400 font-bold block mb-1">CNIC Back Image</label>
+              <div className="flex flex-col items-center justify-center border border-dashed border-gray-300 rounded-lg p-4 bg-gray-50/50 cursor-pointer relative min-h-[120px] hover:bg-gray-100/50 transition-colors">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleBackFileChange}
+                  className="absolute inset-0 opacity-0 cursor-pointer"
+                />
+                {cnicBackPreview ? (
+                  <img src={cnicBackPreview} alt="CNIC Back Preview" className="w-full h-24 object-contain rounded-md" />
+                ) : (
+                  <>
+                    <span className="text-xl">💳</span>
+                    <span className="text-[10px] text-gray-500 font-bold mt-1 text-center">Upload Back Side</span>
+                  </>
+                )}
+              </div>
             </div>
           </div>
 

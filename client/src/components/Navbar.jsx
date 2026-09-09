@@ -160,7 +160,7 @@ const Navbar = () => {
                   <Link to="/profile" className="flex items-center space-x-2 group">
                     <img
                       className="h-8 w-8 rounded-full object-cover border-2 border-primary-200 group-hover:border-primary-500 transition-colors"
-                      src={user.profileImage || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80'}
+                      src={(user.profileImage?.url || user.profileImage) || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80'}
                       alt={user.name}
                     />
                     <span className="hidden lg:inline-block text-sm font-bold text-gray-700 group-hover:text-primary-700 transition-colors">

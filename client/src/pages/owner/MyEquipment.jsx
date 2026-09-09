@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import API from '../../api/axios';
 import Sidebar from '../../components/Sidebar';
 import EquipmentCard from '../../components/EquipmentCard';
+import MobileBackButton from '../../components/MobileBackButton';
 import LoadingSpinner from '../../components/LoadingSpinner';
 
 const MyEquipment = () => {
@@ -53,6 +54,7 @@ const MyEquipment = () => {
       <Sidebar role="owner" />
 
       <main className="flex-1 p-6 md:p-8 space-y-6 max-w-7xl mx-auto overflow-hidden">
+        <MobileBackButton />
         
         {/* Title */}
         <div className="flex justify-between items-center border-b border-gray-200 pb-5">

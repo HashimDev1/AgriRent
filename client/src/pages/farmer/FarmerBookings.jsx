@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import API from '../../api/axios';
 import Sidebar from '../../components/Sidebar';
 import BookingCard from '../../components/BookingCard';
+import MobileBackButton from '../../components/MobileBackButton';
 import Modal from '../../components/Modal';
 import LoadingSpinner from '../../components/LoadingSpinner';
 
@@ -15,6 +16,51 @@ const FarmerBookings = () => {
   const [selectedBookingForDispute, setSelectedBookingForDispute] = useState(null);
   const [disputeReason, setDisputeReason] = useState('equipment_damage');
   const [disputeDesc, setDisputeDesc] = useState('');
+  const [evidenceFiles, setEvidenceFiles] = useState([]);
+  const [evidencePreviews, setEvidencePreviews] = useState([]);
+
+  const handleCloseDisputeModal = () => {
+    setDisputeModalOpen(false);
+    setDisputeDesc('');
+    setDisputeReason('equipment_damage');
+    evidencePreviews.forEach(URL.revokeObjectURL);
+    setEvidenceFiles([]);
+    setEvidencePreviews([]);
+  };
+
+  const handleEvidenceFileChange = (e) => {
+    const files = Array.from(e.target.files);
+    
+    if (evidenceFiles.length + files.length > 3) {
+      alert('You can upload a maximum of 3 evidence images.');
+      return;
+    }
+
+    const validFiles = [];
+    const newPreviews = [];
+
+    for (const file of files) {
+      if (!file.type.startsWith('image/')) {
+        alert(`${file.name} is not an image file.`);
+        continue;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        alert(`${file.name} exceeds 5MB size limit.`);
+        continue;
+      }
+      validFiles.push(file);
+      newPreviews.push(URL.createObjectURL(file));
+    }
+
+    setEvidenceFiles((prev) => [...prev, ...validFiles]);
+    setEvidencePreviews((prev) => [...prev, ...newPreviews]);
+  };
+
+  const handleRemoveEvidenceImage = (index) => {
+    URL.revokeObjectURL(evidencePreviews[index]);
+    setEvidenceFiles(evidenceFiles.filter((_, i) => i !== index));
+    setEvidencePreviews(evidencePreviews.filter((_, i) => i !== index));
+  };
 
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
   const [selectedBookingForReview, setSelectedBookingForReview] = useState(null);
@@ -65,14 +111,23 @@ const FarmerBookings = () => {
     e.preventDefault();
     if (!selectedBookingForDispute) return;
     try {
-      await API.post('/disputes', {
-        bookingId: selectedBookingForDispute._id,
-        reason: disputeReason,
-        description: disputeDesc,
+      const data = new FormData();
+      data.append('bookingId', selectedBookingForDispute._id);
+      data.append('reason', disputeReason);
+      data.append('description', disputeDesc);
+
+      evidenceFiles.forEach((file) => {
+        data.append('evidenceImages', file);
       });
+
+      await API.post('/disputes', data, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
       alert('Dispute logged successfully. Status updated to Under Admin Review.');
-      setDisputeModalOpen(false);
-      setDisputeDesc('');
+      handleCloseDisputeModal();
       fetchBookingsAndPayments();
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to log dispute.');
@@ -111,6 +166,7 @@ const FarmerBookings = () => {
       <Sidebar role="farmer" />
 
       <main className="flex-1 p-6 md:p-8 space-y-6 max-w-7xl mx-auto overflow-hidden">
+        <MobileBackButton />
         
         {/* Title */}
         <div className="border-b border-gray-200 pb-5">
@@ -159,7 +215,7 @@ const FarmerBookings = () => {
         {/* Dispute Resolution Modal */}
         <Modal
           isOpen={disputeModalOpen}
-          onClose={() => setDisputeModalOpen(false)}
+          onClose={handleCloseDisputeModal}
           title="Report Dispute / Damage Claims ⚠️"
         >
           <form onSubmit={handleDisputeSubmit} className="space-y-4 text-xs">
@@ -189,6 +245,39 @@ const FarmerBookings = () => {
                 required
               />
             </div>
+
+            <div>
+              <label className="text-[10px] text-gray-400 font-bold block mb-1">Evidence Images (Optional, Max 3)</label>
+              <div className="flex flex-col items-center justify-center border border-dashed border-gray-300 rounded-lg p-4 bg-gray-50/50 cursor-pointer relative hover:bg-gray-100/50 transition-colors">
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={handleEvidenceFileChange}
+                  className="absolute inset-0 opacity-0 cursor-pointer"
+                />
+                <span className="text-xl">📷</span>
+                <span className="text-[10px] text-gray-500 font-bold mt-1 text-center">Upload Evidence Photos</span>
+              </div>
+            </div>
+
+            {evidencePreviews.length > 0 && (
+              <div className="grid grid-cols-3 gap-2 pt-1">
+                {evidencePreviews.map((img, idx) => (
+                  <div key={idx} className="relative rounded-lg overflow-hidden border border-gray-200 aspect-video h-12">
+                    <img src={img} alt="" className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveEvidenceImage(idx)}
+                      className="absolute top-0.5 right-0.5 bg-red-600 text-white text-[8px] font-bold rounded-full w-3.5 h-3.5 flex items-center justify-center shadow-xs hover:bg-red-700 transition-colors"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
             <button
               type="submit"
               className="w-full bg-purple-600 text-white font-bold py-2.5 rounded-lg hover:bg-purple-700 transition-colors"

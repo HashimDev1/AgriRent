@@ -62,7 +62,7 @@ const runTestSeeding = async () => {
         model: 'MF 385',
         rentPerDay: 6500,
         securityDeposit: 15000,
-        images: ['https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=600&q=80'],
+        images: ['https://res.cloudinary.com/hashim055/image/upload/v1781209752/agrirent/equipment/qoio5kqeuxzh9ey0ybtw.jpg'],
         location: {
           type: 'Point',
           coordinates: testOwner.location?.coordinates || [73.0125, 30.2917],
