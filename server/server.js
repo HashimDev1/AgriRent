@@ -52,6 +52,59 @@ app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'ok', service: 'AgriRent API', timestamp: new Date() });
 });
 
+// Quick Seed Route to initialize essential categories and admin account in production
+app.get('/api/seed', async (req, res) => {
+  try {
+    const Category = require('./models/Category');
+    const User = require('./models/User');
+    const bcrypt = require('bcryptjs');
+
+    let seededCategories = 0;
+    const catCount = await Category.countDocuments();
+    if (catCount === 0) {
+      const categoriesData = [
+        { value: 'tractor', label: 'Tractor', subtitle: 'Land preparation', icon: '🚜', img: 'https://res.cloudinary.com/hashim055/image/upload/v1781209752/agrirent/equipment/qoio5kqeuxzh9ey0ybtw.jpg' },
+        { value: 'harvester', label: 'Harvester', subtitle: 'Crop harvesting', icon: '🌾', img: 'https://images.unsplash.com/photo-1595246140625-568b29e0de45?auto=format&fit=crop&w=300&q=80' },
+        { value: 'seed_drill', label: 'Seed Drill', subtitle: 'Precision sowing', icon: '🌱', img: 'https://images.unsplash.com/photo-1605000797499-95a51c7769ae?auto=format&fit=crop&w=300&q=80' },
+        { value: 'sprayer', label: 'Sprayer', subtitle: 'Crop spraying', icon: '💧', img: 'https://images.unsplash.com/photo-1563514223725-41d19b15f40c?auto=format&fit=crop&w=300&q=80' },
+        { value: 'water_pump', label: 'Water Pump', subtitle: 'Irrigation support', icon: '🚿', img: 'https://images.unsplash.com/photo-1508962914676-134849a727f0?auto=format&fit=crop&w=300&q=80' },
+        { value: 'cultivator', label: 'Cultivator', subtitle: 'Soil aeration', icon: '⚙️', img: 'https://images.unsplash.com/photo-1594913785162-e6785b423cb1?auto=format&fit=crop&w=300&q=80' },
+        { value: 'plough', label: 'Plough', subtitle: 'Deep tilling', icon: '🛠️', img: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=300&q=80' },
+        { value: 'other', label: 'Other Attachments', subtitle: 'General maintenance', icon: '⚙️', img: 'https://images.unsplash.com/photo-1416339306562-f3d12fefd36f?auto=format&fit=crop&w=300&q=80' },
+      ];
+      await Category.insertMany(categoriesData);
+      seededCategories = categoriesData.length;
+    }
+
+    let adminStatus = 'already exists';
+    const adminExists = await User.findOne({ email: 'admin@agrirent.com' });
+    if (!adminExists) {
+      const salt = await bcrypt.genSalt(10);
+      const passwordHash = await bcrypt.hash('admin123', salt);
+      await User.create({
+        name: 'System Administrator',
+        email: 'admin@agrirent.com',
+        passwordHash,
+        phone: '03450001122',
+        role: 'admin',
+        isVerified: true,
+        address: 'Islamabad, Pakistan',
+        location: { type: 'Point', coordinates: [73.0479, 33.6844] },
+      });
+      adminStatus = 'created (admin@agrirent.com / admin123)';
+    }
+
+    res.json({
+      success: true,
+      message: 'Database initial data verified.',
+      seededCategories,
+      adminAccount: adminStatus,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 // Bind API Routes
 app.use('/api/auth', require('./routes/shared/authRoutes'));
 app.use('/api/users', require('./routes/shared/userRoutes'));

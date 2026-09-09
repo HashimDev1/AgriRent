@@ -41,7 +41,11 @@ export const AuthProvider = ({ children }) => {
       setUser(userData);
       return res.data;
     } catch (err) {
-      const errMsg = err.response?.data?.message || 'Login failed, check network connectivity.';
+      const errMsg =
+        err.response?.data?.message ||
+        (err.code === 'ECONNABORTED'
+          ? 'Server request timed out. Please try again.'
+          : err.message || 'Invalid credentials or server unavailable.');
       setError(errMsg);
       throw new Error(errMsg);
     } finally {
@@ -60,7 +64,11 @@ export const AuthProvider = ({ children }) => {
       setUser(userData);
       return res.data;
     } catch (err) {
-      const errMsg = err.response?.data?.message || 'Registration failed, verify your input fields.';
+      const errMsg =
+        err.response?.data?.message ||
+        (err.code === 'ECONNABORTED'
+          ? 'Registration timed out. Please try again.'
+          : err.message || 'Registration failed. Please verify your details.');
       setError(errMsg);
       throw new Error(errMsg);
     } finally {
