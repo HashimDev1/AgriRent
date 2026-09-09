@@ -1,22 +1,39 @@
 const cloudinary = require('cloudinary').v2;
 
-const isConfigured = !!(
-  process.env.CLOUDINARY_CLOUD_NAME &&
-  process.env.CLOUDINARY_API_KEY &&
-  process.env.CLOUDINARY_API_SECRET
-);
+let cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+let apiKey = process.env.CLOUDINARY_API_KEY;
+let apiSecret = process.env.CLOUDINARY_API_SECRET;
+let cloudinaryUrl = process.env.CLOUDINARY_URL;
+
+// Parse CLOUDINARY_URL if provided (and clean any accidental angle brackets < >)
+if (cloudinaryUrl) {
+  const cleanUrl = cloudinaryUrl.replace(/[<>]/g, '').trim();
+  const match = cleanUrl.match(/cloudinary:\/\/([^:]+):([^@]+)@(.+)/);
+  if (match) {
+    apiKey = apiKey || match[1];
+    apiSecret = apiSecret || match[2];
+    cloudName = cloudName || match[3];
+  }
+}
+
+// Clean any accidental angle brackets or whitespace from individual variables
+if (cloudName) cloudName = cloudName.replace(/[<>]/g, '').trim();
+if (apiKey) apiKey = apiKey.replace(/[<>]/g, '').trim();
+if (apiSecret) apiSecret = apiSecret.replace(/[<>]/g, '').trim();
+
+const isConfigured = !!(cloudName && apiKey && apiSecret);
 
 if (isConfigured) {
-  // Configure Cloudinary
   cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME.trim(),
-    api_key: process.env.CLOUDINARY_API_KEY.trim(),
-    api_secret: process.env.CLOUDINARY_API_SECRET.trim(),
+    cloud_name: cloudName,
+    api_key: apiKey,
+    api_secret: apiSecret,
   });
+  console.log(`✅ Cloudinary configured successfully for cloud: ${cloudName}`);
 } else {
   console.warn(
     '\x1b[33m%s\x1b[0m', // Yellow output
-    'WARNING: Cloudinary environment variables are missing in /server/.env. Real image uploads are disabled. Falling back to mock uploads.'
+    'WARNING: Cloudinary credentials not configured. Real image uploads are disabled. Falling back to mock uploads.'
   );
 }
 

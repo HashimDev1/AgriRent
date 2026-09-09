@@ -54,14 +54,14 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Register handler
-  const register = async (userData) => {
+  const register = async (registrationData) => {
     setError(null);
     setLoading(true);
     try {
-      const res = await API.post('/auth/register', userData);
+      const res = await API.post('/auth/register', registrationData);
       localStorage.setItem('token', res.data.token);
-      const { token, ...userData } = res.data;
-      setUser(userData);
+      const { token, ...userProfile } = res.data;
+      setUser(userProfile);
       return res.data;
     } catch (err) {
       const errMsg =
