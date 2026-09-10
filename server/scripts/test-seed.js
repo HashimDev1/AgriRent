@@ -81,7 +81,7 @@ const runTestSeeding = async () => {
         model: 'DC-70G',
         rentPerDay: 13500,
         securityDeposit: 30000,
-        images: ['https://images.unsplash.com/photo-1595246140625-568b29e0de45?auto=format&fit=crop&w=600&q=80'],
+        images: ['https://res.cloudinary.com/hashim055/image/upload/v1781213127/agrirent/equipment/kluhscvibk8ox0kflrox.jpg'],
         location: {
           type: 'Point',
           coordinates: testOwner.location?.coordinates || [73.0125, 30.2917],
@@ -100,7 +100,7 @@ const runTestSeeding = async () => {
         model: 'MC-11',
         rentPerDay: 1800,
         securityDeposit: 3000,
-        images: ['https://images.unsplash.com/photo-1594913785162-e6785b423cb1?auto=format&fit=crop&w=600&q=80'],
+        images: ['https://res.cloudinary.com/hashim055/image/upload/v1781213972/agrirent/equipment/mljw0cv3bi4yaqj2wczq.jpg'],
         location: {
           type: 'Point',
           coordinates: testOwner.location?.coordinates || [73.0125, 30.2917],

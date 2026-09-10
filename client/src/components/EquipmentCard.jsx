@@ -4,7 +4,7 @@ import RatingStars from './RatingStars';
 import StatusBadge from './StatusBadge';
 
 const EquipmentCard = ({ equipment, isOwnerView = false, onEdit, onDelete }) => {
-  const fallbackImage = 'https://images.unsplash.com/photo-1599819811279-d5ad9cccf838?auto=format&fit=crop&w=600&q=80';
+  const fallbackImage = 'https://res.cloudinary.com/hashim055/image/upload/v1781209752/agrirent/equipment/qoio5kqeuxzh9ey0ybtw.jpg';
   const getImageUrl = (image) => {
     if (!image) return fallbackImage;
     if (typeof image === 'string') return image;
@@ -21,6 +21,10 @@ const EquipmentCard = ({ equipment, isOwnerView = false, onEdit, onDelete }) => 
           src={imgUrl}
           alt={equipment.title}
           className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src = fallbackImage;
+          }}
         />
         <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-xs px-2.5 py-1 rounded-md text-[10px] font-extrabold uppercase text-primary-700 tracking-wider shadow-xs border border-white/40">
           {equipment.category?.replace('_', ' ')}

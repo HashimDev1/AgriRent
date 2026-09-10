@@ -14,7 +14,7 @@ const EquipmentDetails = () => {
   const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState('');
 
-  const fallbackImage = 'https://images.unsplash.com/photo-1599819811279-d5ad9cccf838?auto=format&fit=crop&w=700&q=80';
+  const fallbackImage = 'https://res.cloudinary.com/hashim055/image/upload/v1781209752/agrirent/equipment/qoio5kqeuxzh9ey0ybtw.jpg';
   const getImageUrl = (image) => {
     if (!image) return fallbackImage;
     if (typeof image === 'string') return image;
@@ -79,6 +79,10 @@ const EquipmentDetails = () => {
               src={getImageUrl(activeImage)}
               alt={equipment.title}
               className="w-full h-full object-cover"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = fallbackImage;
+              }}
             />
           </div>
           {equipment.images && equipment.images.length > 1 && (

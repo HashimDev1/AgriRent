@@ -47,7 +47,7 @@ if (isConfigured) {
 const uploadStream = (fileBuffer, folder) => {
   if (!isConfigured) {
     return Promise.resolve({
-      url: 'https://images.unsplash.com/photo-1599819811279-d5ad9cccf838?auto=format&fit=crop&w=600&q=80',
+      url: 'https://res.cloudinary.com/hashim055/image/upload/v1781209752/agrirent/equipment/qoio5kqeuxzh9ey0ybtw.jpg',
       public_id: 'mock_id_' + Date.now() + '_' + Math.random().toString(36).substring(7),
     });
   }

@@ -55,7 +55,7 @@ const createEquipment = async (req, res) => {
     }
 
     const finalImages = [...bodyImages, ...uploadedImages];
-    const imagesToSave = finalImages.length > 0 ? finalImages : ['https://images.unsplash.com/photo-1599819811279-d5ad9cccf838?auto=format&fit=crop&w=600&q=80'];
+    const imagesToSave = finalImages.length > 0 ? finalImages : ['https://res.cloudinary.com/hashim055/image/upload/v1781209752/agrirent/equipment/qoio5kqeuxzh9ey0ybtw.jpg'];
 
     const equipment = new Equipment({
       ownerId: req.user.id,

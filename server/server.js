@@ -52,28 +52,32 @@ app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'ok', service: 'AgriRent API', timestamp: new Date() });
 });
 
-// Quick Seed Route to initialize essential categories and admin account in production
+// Quick Seed Route to initialize or update essential categories and admin account in production
 app.get('/api/seed', async (req, res) => {
   try {
     const Category = require('./models/Category');
     const User = require('./models/User');
+    const Equipment = require('./models/Equipment');
     const bcrypt = require('bcryptjs');
 
-    let seededCategories = 0;
-    const catCount = await Category.countDocuments();
-    if (catCount === 0) {
-      const categoriesData = [
-        { value: 'tractor', label: 'Tractor', subtitle: 'Land preparation', icon: '🚜', img: 'https://res.cloudinary.com/hashim055/image/upload/v1781209752/agrirent/equipment/qoio5kqeuxzh9ey0ybtw.jpg' },
-        { value: 'harvester', label: 'Harvester', subtitle: 'Crop harvesting', icon: '🌾', img: 'https://images.unsplash.com/photo-1595246140625-568b29e0de45?auto=format&fit=crop&w=300&q=80' },
-        { value: 'seed_drill', label: 'Seed Drill', subtitle: 'Precision sowing', icon: '🌱', img: 'https://images.unsplash.com/photo-1605000797499-95a51c7769ae?auto=format&fit=crop&w=300&q=80' },
-        { value: 'sprayer', label: 'Sprayer', subtitle: 'Crop spraying', icon: '💧', img: 'https://images.unsplash.com/photo-1563514223725-41d19b15f40c?auto=format&fit=crop&w=300&q=80' },
-        { value: 'water_pump', label: 'Water Pump', subtitle: 'Irrigation support', icon: '🚿', img: 'https://images.unsplash.com/photo-1508962914676-134849a727f0?auto=format&fit=crop&w=300&q=80' },
-        { value: 'cultivator', label: 'Cultivator', subtitle: 'Soil aeration', icon: '⚙️', img: 'https://images.unsplash.com/photo-1594913785162-e6785b423cb1?auto=format&fit=crop&w=300&q=80' },
-        { value: 'plough', label: 'Plough', subtitle: 'Deep tilling', icon: '🛠️', img: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=300&q=80' },
-        { value: 'other', label: 'Other Attachments', subtitle: 'General maintenance', icon: '⚙️', img: 'https://images.unsplash.com/photo-1416339306562-f3d12fefd36f?auto=format&fit=crop&w=300&q=80' },
-      ];
-      await Category.insertMany(categoriesData);
-      seededCategories = categoriesData.length;
+    const categoriesData = [
+      { value: 'tractor', label: 'Tractor', subtitle: 'Land preparation', icon: '🚜', img: 'https://res.cloudinary.com/hashim055/image/upload/v1781209752/agrirent/equipment/qoio5kqeuxzh9ey0ybtw.jpg' },
+      { value: 'harvester', label: 'Harvester', subtitle: 'Crop harvesting', icon: '🌾', img: 'https://res.cloudinary.com/hashim055/image/upload/v1781212834/agrirent/categories/lprumcwgvxluih9izhvh.jpg' },
+      { value: 'seed_drill', label: 'Seed Drill', subtitle: 'Precision sowing', icon: '🌱', img: 'https://res.cloudinary.com/hashim055/image/upload/v1781212920/agrirent/categories/bphxixyjloaxop2d5g3l.jpg' },
+      { value: 'sprayer', label: 'Sprayer', subtitle: 'Crop spraying', icon: '💧', img: 'https://res.cloudinary.com/hashim055/image/upload/v1781212891/agrirent/categories/dk7b0vvl1fepem7p0wmz.jpg' },
+      { value: 'water_pump', label: 'Water Pump', subtitle: 'Irrigation support', icon: '🚿', img: 'https://res.cloudinary.com/hashim055/image/upload/v1781214249/agrirent/categories/pugxszbdu1talbrdjqf5.jpg' },
+      { value: 'cultivator', label: 'Cultivator', subtitle: 'Soil aeration', icon: '⚙️', img: 'https://res.cloudinary.com/hashim055/image/upload/v1781212800/agrirent/categories/culylyvws4h2swvf8mmn.jpg' },
+      { value: 'plough', label: 'Plough', subtitle: 'Deep tilling', icon: '🛠️', img: 'https://res.cloudinary.com/hashim055/image/upload/v1781214209/agrirent/categories/fhho7ays9quvvsbmnjfg.jpg' },
+      { value: 'other', label: 'Other Attachments', subtitle: 'General maintenance', icon: '⚙️', img: 'https://res.cloudinary.com/hashim055/image/upload/v1781214112/agrirent/equipment/i5ljph4awtdsx3ppdci8.jpg' },
+    ];
+
+    // Upsert each category with verified Cloudinary image
+    for (const cat of categoriesData) {
+      await Category.findOneAndUpdate(
+        { value: cat.value },
+        { $set: { label: cat.label, subtitle: cat.subtitle, icon: cat.icon, img: cat.img } },
+        { upsert: true, new: true }
+      );
     }
 
     let adminStatus = 'already exists';
@@ -94,10 +98,44 @@ app.get('/api/seed', async (req, res) => {
       adminStatus = 'created (admin@agrirent.com / admin123)';
     }
 
+    // Update equipment listings to use authentic Cloudinary photos
+    await Equipment.updateMany(
+      { category: 'tractor' },
+      { $set: { images: ['https://res.cloudinary.com/hashim055/image/upload/v1781209752/agrirent/equipment/qoio5kqeuxzh9ey0ybtw.jpg'] }
+    );
+    await Equipment.updateMany(
+      { category: 'harvester' },
+      { $set: { images: ['https://res.cloudinary.com/hashim055/image/upload/v1781213127/agrirent/equipment/kluhscvibk8ox0kflrox.jpg'] }
+    );
+    await Equipment.updateMany(
+      { category: 'seed_drill' },
+      { $set: { images: ['https://res.cloudinary.com/hashim055/image/upload/v1781213242/agrirent/equipment/qkpoir3bhtpwv4txpzfk.jpg'] }
+    );
+    await Equipment.updateMany(
+      { category: 'sprayer' },
+      { $set: { images: ['https://res.cloudinary.com/hashim055/image/upload/v1781213105/agrirent/equipment/kucspae23hdcy3ik7h66.jpg'] }
+    );
+    await Equipment.updateMany(
+      { category: 'water_pump' },
+      { $set: { images: ['https://res.cloudinary.com/hashim055/image/upload/v1781213594/agrirent/equipment/drk4enx7jtqr1jehlntv.jpg'] }
+    );
+    await Equipment.updateMany(
+      { category: 'cultivator' },
+      { $set: { images: ['https://res.cloudinary.com/hashim055/image/upload/v1781213972/agrirent/equipment/mljw0cv3bi4yaqj2wczq.jpg'] }
+    );
+    await Equipment.updateMany(
+      { category: 'plough' },
+      { $set: { images: ['https://res.cloudinary.com/hashim055/image/upload/v1781214084/agrirent/equipment/h8ajkf6701z5sfaizbel.jpg'] }
+    );
+    await Equipment.updateMany(
+      { category: 'other' },
+      { $set: { images: ['https://res.cloudinary.com/hashim055/image/upload/v1781214112/agrirent/equipment/i5ljph4awtdsx3ppdci8.jpg'] }
+    );
+
     res.json({
       success: true,
-      message: 'Database initial data verified.',
-      seededCategories,
+      message: 'All categories and equipment updated with authentic Cloudinary URLs!',
+      categoriesCount: categoriesData.length,
       adminAccount: adminStatus,
     });
   } catch (error) {

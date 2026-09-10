@@ -5,6 +5,17 @@ import RatingStars from '../components/RatingStars';
 import StatusBadge from '../components/StatusBadge';
 import LoadingSpinner from '../components/LoadingSpinner';
 
+const defaultCategories = [
+  { value: 'tractor', label: 'Tractor', subtitle: 'Land preparation', icon: '🚜', img: 'https://res.cloudinary.com/hashim055/image/upload/v1781209752/agrirent/equipment/qoio5kqeuxzh9ey0ybtw.jpg' },
+  { value: 'harvester', label: 'Harvester', subtitle: 'Crop harvesting', icon: '🌾', img: 'https://res.cloudinary.com/hashim055/image/upload/v1781212834/agrirent/categories/lprumcwgvxluih9izhvh.jpg' },
+  { value: 'seed_drill', label: 'Seed Drill', subtitle: 'Precision sowing', icon: '🌱', img: 'https://res.cloudinary.com/hashim055/image/upload/v1781212920/agrirent/categories/bphxixyjloaxop2d5g3l.jpg' },
+  { value: 'sprayer', label: 'Sprayer', subtitle: 'Crop spraying', icon: '💧', img: 'https://res.cloudinary.com/hashim055/image/upload/v1781212891/agrirent/categories/dk7b0vvl1fepem7p0wmz.jpg' },
+  { value: 'water_pump', label: 'Water Pump', subtitle: 'Irrigation support', icon: '🚿', img: 'https://res.cloudinary.com/hashim055/image/upload/v1781214249/agrirent/categories/pugxszbdu1talbrdjqf5.jpg' },
+  { value: 'cultivator', label: 'Cultivator', subtitle: 'Soil aeration', icon: '⚙️', img: 'https://res.cloudinary.com/hashim055/image/upload/v1781212800/agrirent/categories/culylyvws4h2swvf8mmn.jpg' },
+  { value: 'plough', label: 'Plough', subtitle: 'Deep tilling', icon: '🛠️', img: 'https://res.cloudinary.com/hashim055/image/upload/v1781214209/agrirent/categories/fhho7ays9quvvsbmnjfg.jpg' },
+  { value: 'other', label: 'Other Attachments', subtitle: 'General maintenance', icon: '⚙️', img: 'https://res.cloudinary.com/hashim055/image/upload/v1781214112/agrirent/equipment/i5ljph4awtdsx3ppdci8.jpg' },
+];
+
 const Home = () => {
   const navigate = useNavigate();
   const [featured, setFeatured] = useState([]);
@@ -19,7 +30,7 @@ const Home = () => {
   const [searchCity, setSearchCity] = useState('');
   const [searchCategory, setSearchCategory] = useState('');
   const [searchPriceRange, setSearchPriceRange] = useState('');
-  const [categories, setCategories] = useState([]);
+  const [categories, setCategories] = useState(defaultCategories);
 
   useEffect(() => {
     const fetchHomeData = async () => {
@@ -29,14 +40,16 @@ const Home = () => {
           API.get('/categories')
         ]);
 
-        const approvedOnly = equipRes.data.filter((e) => e.status === 'approved');
+        const approvedOnly = (equipRes.data || []).filter((e) => e.status === 'approved');
         if (approvedOnly.length > 0) {
           setFeatured(approvedOnly.slice(0, 4));
         } else {
-          setFeatured(defaultFeaturedPlaceholder);
+          setFeatured([]);
         }
 
-        setCategories(catRes.data);
+        if (catRes.data && Array.isArray(catRes.data) && catRes.data.length > 0) {
+          setCategories(catRes.data);
+        }
       } catch (err) {
         console.error('Failed to load home page data:', err);
       } finally {
@@ -131,7 +144,7 @@ const Home = () => {
               className="w-full h-full object-contain object-right transition-transform duration-700 hover:scale-105"
               onError={(e) => {
                 e.target.onerror = null;
-                e.target.src = 'https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=600&q=80';
+                e.target.src = 'https://res.cloudinary.com/hashim055/image/upload/v1781209752/agrirent/equipment/qoio5kqeuxzh9ey0ybtw.jpg';
               }}
             />
           </div>
@@ -234,7 +247,7 @@ const Home = () => {
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   onError={(e) => {
                     e.target.onerror = null;
-                    e.target.src = 'https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=300&q=80';
+                    e.target.src = 'https://res.cloudinary.com/hashim055/image/upload/v1781209752/agrirent/equipment/qoio5kqeuxzh9ey0ybtw.jpg';
                   }}
                 />
                 <div className="absolute inset-0 bg-primary-950/20 group-hover:bg-primary-950/10 transition-colors"></div>
@@ -329,12 +342,12 @@ const Home = () => {
                 {/* Image */}
                 <div className="relative h-44 bg-gray-100 overflow-hidden">
                   <img
-                    src={getImageUrl(item.images?.[0]) || 'https://images.unsplash.com/photo-1599819811279-d5ad9cccf838?auto=format&fit=crop&w=600&q=80'}
+                    src={getImageUrl(item.images?.[0]) || 'https://res.cloudinary.com/hashim055/image/upload/v1781209752/agrirent/equipment/qoio5kqeuxzh9ey0ybtw.jpg'}
                     alt={item.title}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     onError={(e) => {
                       e.target.onerror = null;
-                      e.target.src = 'https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=600&q=80';
+                      e.target.src = 'https://res.cloudinary.com/hashim055/image/upload/v1781209752/agrirent/equipment/qoio5kqeuxzh9ey0ybtw.jpg';
                     }}
                   />
                   <span className="absolute top-3 left-3 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded text-[9px] font-extrabold uppercase text-primary-700 border border-white/20">
